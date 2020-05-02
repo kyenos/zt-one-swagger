@@ -1,0 +1,870 @@
+paths:
+  /network:
+    get:
+      operationId: listnetworks
+      summary: 'Attain a list of networks addressable by the client'
+      description: 'The logged in user or bearer will be able to see a specific list of network. Viewable networks will be listed '
+      responses:
+        '200':
+          description: 'all networks for which you have at least read access.'
+          schema:
+            type: array
+            title: 'Array of Network Objects'
+            description: 'An array of network objects'
+            items:
+              $ref: '#/definitions/Network'
+            uniqueItems: true
+  '/network/{networkId}':
+    get:
+      operationId: getNetwork
+      summary: 'Get network configuration and status information'
+      description: 'Get detailed network information on a specific network ID'
+      responses:
+        '200':
+          $ref: '#/responses/network'
+        '404':
+          $ref: '#/responses/unkown'
+      parameters:
+        -
+          name: networkId
+          in: path
+          description: '16-digit ZeroTier network ID'
+          required: true
+          type: string
+    post:
+      operationId: updateNetwork
+      summary: 'Update network ID with the given post body'
+      description: "Only fields marked as [rw] can be directly modified. If other fields are present in the posted request they are ignored.\n\nNew networks can be created by POSTing to /api/network with no networkId parameter. The server will create a random unused network ID and return the new network record."
+      responses:
+        '200':
+          description: 'The network object with updated values'
+          schema:
+            $ref: '#/definitions/Network'
+        '404':
+          $ref: '#/responses/unkown'
+      parameters:
+        -
+          name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Network'
+        -
+          name: networkId
+          in: path
+          description: '16-digit ZeroTier network ID'
+          required: true
+          type: string
+    delete:
+      operationId: deleteNetwork
+      summary: 'Delete a network and all its related information permanently. Use extreme caution as this cannot be undone!'
+      responses:
+        '200':
+          description: 'No body is returned for this response'
+        '404':
+          $ref: '#/responses/unkown'
+      parameters:
+        -
+          name: networkId
+          in: path
+          description: '16-digit ZeroTier network ID'
+          required: true
+          type: string
+  '/network/{neworkId}/member':
+    get:
+      operationId: listMembers
+      summary: 'Get all members of a network for which you have at least read access.'
+      description: "Get all members of a network for which you have at least read access.\n\n"
+      responses:
+        '200':
+          description: 'Network member settings'
+          schema:
+            type: array
+            description: 'Array of member objects'
+            items:
+              $ref: '#/definitions/Member'
+      parameters:
+        -
+          name: neworkId
+          in: path
+          description: '16-digit ZeroTier network ID'
+          required: true
+          type: string
+  '/network/{neworkId}/member/{nodeId}':
+    delete:
+      operationId: deleteMember
+      summary: 'Delete a network member and all its related information permanently. This cannot be undone!'
+      responses:
+        '200':
+          description: 'No body is returned for this response'
+        '404':
+          $ref: '#/responses/unkown'
+      parameters:
+        -
+          name: neworkId
+          in: path
+          description: '16-digit ZeroTier network ID'
+          required: true
+          type: string
+        -
+          name: nodeId
+          in: path
+          description: '10-digit ZeroTier node ID (a.k.a. ZeroTier address)'
+          required: true
+          type: string
+    get:
+      description: 'Get network member settings'
+      responses:
+        '200':
+          $ref: '#/responses/member'
+        '404':
+          $ref: '#/responses/unkown'
+      parameters:
+        -
+          name: neworkId
+          in: path
+          description: '16-digit ZeroTier network ID'
+          required: true
+          type: string
+        -
+          name: nodeId
+          in: path
+          description: '10-digit ZeroTier node ID (a.k.a. ZeroTier address)'
+          required: true
+          type: string
+    post:
+      operationId: updateMember
+      description: "Update or create node\n\nNew members can be added to a network by POSTing them."
+      responses:
+        '200':
+          $ref: '#/responses/member'
+        '404':
+          $ref: '#/responses/unkown'
+      parameters:
+        -
+          name: neworkId
+          in: path
+          description: "16-digit ZeroTier network ID\n\n"
+          required: true
+          type: string
+        -
+          name: nodeId
+          in: path
+          description: "10-digit ZeroTier node ID (a.k.a. ZeroTier address)\n\n"
+          required: true
+          type: string
+        -
+          name: body
+          in: body
+          description: 'The content of the member to update or craeat.'
+          required: true
+          schema:
+            $ref: '#/definitions/Member'
+  /user:
+    get:
+      operationId: getUsers
+      description: 'Get all users for which you have at least read access.'
+      responses:
+        '200':
+          description: 'Array of User objects'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+            uniqueItems: true
+  '/user/{userId}':
+    get:
+      operationId: getUser
+      summary: 'Retrieve a User'
+      responses:
+        '200':
+          $ref: '#/responses/user'
+        '401':
+          $ref: '#/responses/error'
+      parameters:
+        -
+          name: userId
+          in: path
+          description: '0000-0000-0000-000000000000 (required,string) - Internal user ID (GUID)'
+          required: true
+          type: string
+    post:
+      operationId: updateUser
+      description: 'Only fields marked as [rw] can be directly modified. If other fields are present in the posted request they are ignored.'
+      responses:
+        '200':
+          $ref: '#/responses/user'
+        '401':
+          $ref: '#/responses/error'
+      parameters:
+        -
+          name: userId
+          in: path
+          description: '0000-0000-0000-000000000000 (required,string) - Internal user ID (GUID)'
+          required: true
+          type: string
+        -
+          name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+    delete:
+      operationId: deleteUser
+      summary: 'Don''t do this... it''s permanent.'
+      description: "\nDelete a user. This will immediately and PERMANENTLY delete a user and all associated networks and data. Only hit this URL if you’re 100% sure you want the user deleted."
+      responses:
+        '200':
+          description: "Indicates the action has been taken\n\nNo body is returned for this response"
+        '401':
+          $ref: '#/responses/error'
+      parameters:
+        -
+          name: userId
+          in: path
+          description: '0000-0000-0000-000000000000 (required,string) - Internal user ID (GUID)'
+          required: true
+          type: string
+  /randomToken:
+    get:
+      operationId: randomToken
+      description: 'This generates a random token suitable for use as an API token server-side using a secure random source. It does not actually modify the user record, just returns the token for use by API callers or the UI.'
+      responses:
+        '200':
+          $ref: '#/responses/token'
+        '403':
+          $ref: '#/responses/forbidden'
+
+responses:
+  network:
+    description: 'Network configuration (for actual controller) [rw]'
+    schema:
+      $ref: '#/definitions/Network'
+  token:
+    description: 'Random token suitable for use as an API token'
+    schema:
+      type: object
+      title: randomToken
+      description: 'This generates a random token suitable for use as an API token server-side using a secure random source. It does not actually modify the user record, just returns the token for use by API callers or the UI.'
+      properties:
+        token:
+          type: string
+          description: 'Random string suitable for use as an API authentication token'
+          readOnly: true
+        clock:
+          type: integer
+          description: 'Current server-side system clock (ms since epoch)'
+          format: int64
+          readOnly: true
+        raw:
+          type: string
+          description: 'Raw random bytes in hex format'
+          readOnly: true
+  error:
+    description: 'Detailed error message'
+    schema:
+      type: object
+      description: 'Error Message'
+      properties:
+        type:
+          type: string
+          description: 'Describes the error message type'
+          readOnly: true
+        message:
+          type: string
+          description: 'The text value of the message'
+          readOnly: true
+  unkown:
+    description: 'Unable to find requested asset,  404 page not found'
+    schema:
+      type: string
+
+  forbidden:
+    description: '403 error, not allowed'
+    schema:
+      type: string
+      enum:
+        - '404 page not found'
+  member:
+    description: 'Member of a network for which you have at least read access.'
+    schema:
+      $ref: '#/definitions/Member'
+  user:
+    description: 'Get a user for which you have at least read access.'
+    schema:
+      $ref: '#/definitions/User'
+definitions:
+  Network:
+    type: object
+    description: 'Objects of this type represent a ZeroTier network beloging to a user'
+    properties:
+      id:
+        type: string
+        description: '16-digit ZeroTier network ID'
+        readOnly: true
+      type:
+        type: string
+        description: "The object type as a string. In this case the only alowed value is Network\nObject type (\"Network\") [ro]"
+        enum:
+          - Network
+        default: Network
+        readOnly: true
+      clock:
+        type: integer
+        description: 'Current system clock on server [ro]'
+        format: int64
+        readOnly: true
+      ui:
+        type: object
+        description: 'Arbitrary data that is stored and used by the UI [rw]'
+      rulesSource:
+        type: string
+        description: 'Source code of network rule set [rw]'
+      description:
+        type: string
+        description: 'Long description of this network [rw]'
+      permissions:
+        $ref: '#/definitions/Permissions'
+      onlineMemberCount:
+        type: integer
+        description: 'Number of members online [ro]'
+        format: int64
+        readOnly: true
+      capabilitiesByName:
+        $ref: '#/definitions/Rule'
+      tagsByName:
+        $ref: '#/definitions/Rule'
+      circuitTestEvery:
+        type: integer
+        description: 'Circuit test this network every N milliseconds [ro]'
+        format: int32
+        readOnly: true
+      ownerId:
+        type: string
+        description: 'The GUID user id of the owner of this network [ro]'
+        readOnly: true
+      authorizedMemberCount:
+        type: integer
+        description: 'Number of members ever authorized on the network [ro]'
+        format: int64
+        readOnly: true
+      totalMemberCount:
+        type: integer
+        description: 'Number of members currently authorized on the network [ro]'
+        format: int64
+        readOnly: true
+      config:
+        $ref: '#/definitions/NetworkConfig'
+  NetworkConfig:
+    type: object
+    description: 'Network configuration (for actual controller) [rw]'
+    properties:
+      id:
+        type: string
+        description: '16-digit ZeroTier network ID [ro]'
+        readOnly: true
+      nwid:
+        type: string
+        description: '16-digit ZeroTier network ID (for backward compatibility) [ro]'
+      name:
+        type: string
+        description: 'Short name of network [rw]'
+      objtype:
+        type: string
+        description: 'Object type on controller ("network") [ro]'
+        readOnly: true
+      creationTime:
+        type: number
+        description: 'Time network was created on controller [ro]'
+        format: float
+        readOnly: true
+      revision:
+        type: integer
+        description: 'Network revision number [ro]'
+        format: int32
+        readOnly: true
+      lastModified:
+        type: integer
+        description: 'Time config was last modified [ro]'
+        format: int64
+        readOnly: true
+      multicastLimit:
+        type: integer
+        description: 'Max recipients per multicast or broadcast [rw]'
+        format: int32
+      routes:
+        type: array
+        description: 'Array of IP routes published to members [rw]'
+        items:
+          $ref: '#/definitions/Route'
+      rules:
+        type: array
+        description: 'Network base rules table [rw]'
+        items:
+          $ref: '#/definitions/Rule'
+      tags:
+        type: array
+        description: 'Array of tags available on this network [rw]'
+        items:
+          $ref: '#/definitions/Rule'
+      capabilities:
+        type: array
+        description: 'Array of capabilities available on this network [rw]'
+        items:
+          $ref: '#/definitions/Rule'
+      totalMemberCount:
+        type: integer
+        description: 'Total number of members [ro]'
+        format: int32
+        readOnly: true
+      activeMemberCount:
+        type: integer
+        description: 'Number of active/online members [ro]'
+        format: int32
+        readOnly: true
+      authTokens:
+        type: array
+        description: 'Array of authentication tokens for auto-authorizing new members [rw]'
+        items:
+          type: string
+      authorizedMemberCount:
+        type: number
+        description: 'Number of authorized members [ro]'
+        format: float
+        readOnly: true
+      v4AssignMode:
+        $ref: '#/definitions/v4AssignMode'
+      v6AssignMode:
+        $ref: '#/definitions/v6AssignMode'
+      ipAssignmentPools:
+        type: array
+        description: 'list if IP address range pools for node assignment [rw]'
+        items:
+          $ref: '#/definitions/IpAssignmentPool'
+        uniqueItems: true
+      mtu:
+        type: integer
+        description: 'The MTU for packets'
+        format: int32
+      remoteTraceLevel:
+        type: integer
+        description: 'TBD; figure out what this value is for'
+        format: int32
+      remoteTraceTarget:
+        type: string
+        description: 'TBD; figure out what this might look like'
+  Permissions:
+    type: object
+    description: 'Actors with permissions that apply to this object [ro]'
+    properties:
+      '{id}':
+        type: object
+        description: 'Permissions possessed by actor object, by object ID [ro]'
+        readOnly: true
+        properties:
+          t:
+            type: string
+            description: 'Type of actor object (currently User or Group)'
+          r:
+            type: boolean
+            title: Read
+          m:
+            type: boolean
+            title: Modify
+          d:
+            type: boolean
+            title: Delete
+          a:
+            type: boolean
+            title: Authorize
+  IpAssignmentPool:
+    type: object
+    description: 'Ip assignment pool range [rw]'
+    properties:
+      ipRangeStart:
+        type: string
+        description: 'Start IP of the address range [rw]'
+      ipRangeEnd:
+        type: string
+        description: 'End IP of the address range [rw]'
+    required:
+      - ipRangeStart
+      - ipRangeEnd
+  v4AssignMode:
+    type: object
+    description: 'IPv4 Auto-Assign flags'
+    properties:
+      zt:
+        type: boolean
+        description: 'ZeroTier Auto-Assign from IP range'
+    required:
+      - zt
+  v6AssignMode:
+    type: object
+    description: 'IPv4 Auto-Assign flags'
+    properties:
+      6plane:
+        type: boolean
+        description: 'ZeroTier 6PLANE (/80 routable for each device)'
+      rfc4193:
+        type: boolean
+        description: 'ZeroTier RFC4193 (/128 for each device)'
+      zt:
+        type: boolean
+        description: 'ZeroTier Auto-Assign from IP range'
+    required:
+      - 6plane
+      - rfc4193
+      - zt
+  Rule:
+    type: object
+    description: 'A rule relating to compile rule source'
+    properties:
+      etherType:
+        type: integer
+        description: 'Ethernet frame type.'
+        format: int32
+      not:
+        type: boolean
+        description: 'Logical operator not'
+      or:
+        type: boolean
+        description: 'Logical operator or'
+      type:
+        type: string
+        description: 'ZeroTier Rule type'
+        enum:
+          - ACTION_DROP
+          - ACTION_BREAK
+          - ACTION_ACCEPT
+          - ACTION_TEE
+          - ACTION_REDIRECT
+          - MATCH_SOURCE_ZEROTIER_ADDRESS
+          - MATCH_DEST_ZEROTIER_ADDRESS
+          - MATCH_MAC_SOURCE
+          - MATCH_MAC_DEST
+          - MATCH_IPV4_SOURCE
+          - MATCH_IPV4_DEST
+          - MATCH_IPV6_SOURCE
+          - MATCH_IPV6_DEST
+          - MATCH_IP_TOS
+          - MATCH_IP_PROTOCOL
+          - MATCH_ETHERTYPE
+          - MATCH_ICMP
+          - MATCH_IP_SOURCE_PORT_RANGE
+          - MATCH_IP_DEST_PORT_RANGE
+          - MATCH_CHARACTERISTICS
+          - MATCH_FRAME_SIZE_RANGE
+          - MATCH_RANDOM
+          - MATCH_TAGS_DIFFERENCE
+          - MATCH_TAGS_BITWISE_AND
+          - MATCH_TAGS_BITWISE_OR
+          - MATCH_TAGS_BITWISE_XOR
+          - MATCH_TAGS_EQUAL
+          - MATCH_TAG_SENDER
+          - MATCH_TAG_RECEIVER
+      start:
+        type: integer
+        format: int32
+      end:
+        type: integer
+        format: int32
+      ipProtocol:
+        type: integer
+        description: 'IP protocol number.'
+        format: int32
+      value:
+        type: integer
+        description: 'Value argument'
+        format: int32
+      length:
+        type: integer
+        description: 'Send a copy of up to the first length bytes (-1 for all) '
+        format: int32
+      address:
+        type: string
+        description: 'a ZeroTier address.'
+      zt:
+        type: string
+        description: 'a VL1 address.'
+      id:
+        type: string
+        description: 'ID to a random value'
+      mac:
+        type: string
+        description: 'Ethernet MAC address.'
+      ipAddress:
+        type: string
+        description: 'Either an IPv6 or an IPv4 address'
+      mask:
+        type: integer
+        description: 'IP TOS field bitwise-ANDed with mask'
+        format: int32
+      icmpType:
+        type: string
+        description: 'ICMP type'
+      icmpCode:
+        type: integer
+        description: 'ICMP code, if applicable'
+        format: int32
+      probability:
+        type: integer
+        description: 'Match if a random 32-bit number is less than or equal to the probability.'
+        format: int32
+    required:
+      - type
+  Route:
+    type: object
+    description: 'Represents a managed static route'
+    properties:
+      target:
+        type: string
+        description: "Target in network / mask form. \nexample; 172.22.0.0/16"
+      via:
+        type: string
+        description: 'The gateway router or bridge to target the new route'
+    required:
+      - target
+  User:
+    type: object
+    description: 'ZeroTier User'
+    properties:
+      id:
+        type: string
+        description: 'User ID (GUID) [ro]'
+        readOnly: true
+      type:
+        type: string
+        description: 'Object type [ro]'
+        readOnly: true
+      clock:
+        type: integer
+        description: 'Current system clock on server [ro]'
+        format: int32
+        readOnly: true
+      globalPermissions:
+        $ref: '#/definitions/Permissions'
+      ui:
+        type: object
+        description: 'Arbitrary data that is stored and used by the UI [rw]'
+      displayName:
+        type: string
+        description: 'User display name [rw]'
+      email:
+        type: string
+        description: 'User e-mail [ro]'
+        readOnly: true
+      auth:
+        type: object
+        description: 'Object containing one or more authentication types and login names or IDs [ro]'
+        readOnly: true
+        properties:
+          local:
+            type: string
+            description: 'Local authorization type (i.e. logged in). contains the user name'
+          oidc:
+            type: string
+            description: 'token based authentication, contains a refrence to the token'
+      smsNumber:
+        type: string
+        description: '"SMS telephone number for sending SMS notifications [rw]"'
+      tokens:
+        type: array
+        description: 'Array of API authentication tokens [rw]'
+        items:
+          type: string
+          description: 'Authentication token'
+      permissions:
+        type: object
+        description: 'Actors with permissions that apply to this object [ro]'
+        readOnly: true
+        additionalProperties:
+          $ref: '#/definitions/Permissions'
+      subscriptions:
+        type: object
+        description: 'Subscriptions by plan ID [ro]'
+        readOnly: true
+  Member:
+    type: object
+    description: 'ZeroTier Network Member'
+    properties:
+      id:
+        type: string
+        description: 'Member record ID, which is formed from the network and node IDs [ro]'
+        readOnly: true
+      type:
+        type: string
+        description: 'Object type (Member) [ro]'
+        readOnly: true
+      clock:
+        type: integer
+        description: 'System clock on server [ro]'
+        format: int64
+        readOnly: true
+      networkId:
+        type: string
+        description: '16-digit ZeroTier network ID [ro]'
+        readOnly: true
+      nodeId:
+        type: string
+        description: '10-digit ZeroTier node ID / device address [ro]'
+        readOnly: true
+      controllerID:
+        type: string
+        description: '10-digit ZeroTier node ID of controller (same as first 10 digits of network ID) [ro]'
+        readOnly: true
+      hidden:
+        type: boolean
+        description: 'Hidden in UI? [rw]'
+      name:
+        type: string
+        description: 'Short name describing member [rw]'
+      description:
+        type: string
+        description: 'Long form description [rw]'
+      online:
+        type: boolean
+        description: 'Member is online? (has requested an update recently) [ro]'
+        readOnly: true
+      lastOnline:
+        type: integer
+        description: 'Time member was last determined to be online [ro]'
+        format: int64
+        readOnly: true
+      lastOffline:
+        type: integer
+        description: 'Time member was last determined to be offline [ro]'
+        format: int64
+        readOnly: true
+      physicalAddress:
+        type: string
+        description: 'Latest physical address of member [ro]'
+        readOnly: true
+      physicalLocation:
+        type: object
+        description: 'Lat/lon of estimated (GeoIP-determined) location of physicalAddress (if available) [ro]'
+        readOnly: true
+      clientVersion:
+        type: string
+        description: 'Most recent client software version [ro]'
+        readOnly: true
+      protocolVersion:
+        type: integer
+        description: 'Most recent client-reported ZeroTier protocol version [ro]'
+        format: int32
+        readOnly: true
+      supportsCircuitTesting:
+        type: boolean
+        description: 'True if member supports circuit testing [ro]'
+        readOnly: true
+      supportsRulesEngine:
+        type: boolean
+        description: 'True if member supports the new (post-1.2) rules engine [ro]'
+        readOnly: true
+      offlineNotifyDelay:
+        type: integer
+        description: 'Notify of offline after this many milliseconds [rw]'
+        format: int32
+      config:
+        $ref: '#/definitions/MemberConfig'
+  MemberConfig:
+    type: object
+    description: 'Member configuration (for actual controller) [rw]'
+    properties:
+      id:
+        type: string
+        description: '10-digit ZeroTier node ID [ro]'
+        readOnly: true
+      address:
+        type: string
+        description: '10-digit ZeroTier node ID [ro]'
+        readOnly: true
+      nwid:
+        type: string
+        description: '16-digit network ID [ro]'
+        readOnly: true
+      objtype:
+        type: string
+        description: 'Object type on controller (\"member\") [ro]'
+        readOnly: true
+      authorized:
+        type: boolean
+        description: 'True if authorized (only matters on private networks) [rw]'
+      capabilities:
+        type: array
+        description: 'History of most recent authentications [ro]'
+        items:
+          $ref: '#/definitions/Rule'
+      tags:
+        type: array
+        description: 'Array of tuples of tag ID, tag value [rw]'
+        items:
+          type: object
+          description: 'A touple tag ID / Value'
+      creationTime:
+        type: integer
+        description: 'Time member record was first created [ro]'
+        format: int64
+        readOnly: true
+      identity:
+        type: string
+        description: 'ZeroTier public identity of member (address and public key) [ro]'
+        readOnly: true
+      ipAssignments:
+        type: array
+        description: 'Array of IP assignments published to member [rw]'
+        items:
+          type: string
+          description: 'IP Address'
+      lastAuthorizedTime:
+        type: integer
+        description: 'Time member was last authorized on network [ro]'
+        format: int64
+        readOnly: true
+      lastDeauthorizedTime:
+        type: integer
+        description: 'Time member was last de-authorized on network [ro]'
+        format: int64
+        readOnly: true
+      noAutoAssignIps:
+        type: boolean
+        description: 'If true do not auto-assign IPv4 or IPv6 addresses, overriding network settings [rw]'
+      physicalAddr:
+        type: string
+        description: 'Last known physical address of member [ro]'
+        readOnly: true
+      revision:
+        type: integer
+        description: 'Member record revision counter [ro]"'
+        format: int32
+securityDefinitions:
+  Bearer:
+    description: 'Bearer Token'
+    type: apiKey
+    name: "Authorization"
+    in: header
+  UserPass:
+    description: 'Basic Username and password'
+    type: basic
+info:
+  title: 'ZeroTier API'
+  version: '4'
+  termsOfService: 'https://zerotier.com/pricing/'
+  contact:
+    name: 'KARIM F SHARIF'
+    email: karim@dawenga.com
+    url: 'https://www.dawenga.com'
+  license:
+    name: MIT
+    url: 'https://opensource.org/licenses/MIT'
+externalDocs:
+  url: 'https://my.zerotier.com/help/api'
+host: my.zerotier.com
+basePath: /api
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+swagger: '2.0'
