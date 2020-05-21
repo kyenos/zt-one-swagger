@@ -1,6 +1,8 @@
 paths:
   /network:
     get:
+      tags:
+        - network
       operationId: listnetworks
       summary: 'Attain a list of networks addressable by the client'
       description: 'The logged in user or bearer will be able to see a specific list of network. Viewable networks will be listed '
@@ -16,6 +18,8 @@ paths:
             uniqueItems: true
   '/network/{networkId}':
     get:
+      tags:
+        - network
       operationId: getNetwork
       summary: 'Get network configuration and status information'
       description: 'Get detailed network information on a specific network ID'
@@ -32,6 +36,8 @@ paths:
           required: true
           type: string
     post:
+      tags:
+        - network
       operationId: updateNetwork
       summary: 'Update network ID with the given post body'
       description: "Only fields marked as [rw] can be directly modified. If other fields are present in the posted request they are ignored.\n\nNew networks can be created by POSTing to /api/network with no networkId parameter. The server will create a random unused network ID and return the new network record."
@@ -56,6 +62,8 @@ paths:
           required: true
           type: string
     delete:
+      tags:
+        - network
       operationId: deleteNetwork
       summary: 'Delete a network and all its related information permanently. Use extreme caution as this cannot be undone!'
       responses:
@@ -72,6 +80,8 @@ paths:
           type: string
   '/network/{neworkId}/member':
     get:
+      tags:
+        - member
       operationId: listMembers
       summary: 'Get all members of a network for which you have at least read access.'
       description: "Get all members of a network for which you have at least read access.\n\n"
@@ -92,6 +102,8 @@ paths:
           type: string
   '/network/{neworkId}/member/{nodeId}':
     delete:
+      tags:
+        - member
       operationId: deleteMember
       summary: 'Delete a network member and all its related information permanently. This cannot be undone!'
       responses:
@@ -113,6 +125,8 @@ paths:
           required: true
           type: string
     get:
+      tags:
+        - member
       description: 'Get network member settings'
       responses:
         '200':
@@ -133,6 +147,8 @@ paths:
           required: true
           type: string
     post:
+      tags:
+        - member
       operationId: updateMember
       description: "Update or create node\n\nNew members can be added to a network by POSTing them."
       responses:
@@ -162,6 +178,8 @@ paths:
             $ref: '#/definitions/Member'
   /user:
     get:
+      tags:
+        - user
       operationId: getUsers
       description: 'Get all users for which you have at least read access.'
       responses:
@@ -174,6 +192,8 @@ paths:
             uniqueItems: true
   '/user/{userId}':
     get:
+      tags:
+        - user
       operationId: getUser
       summary: 'Retrieve a User'
       responses:
@@ -189,6 +209,8 @@ paths:
           required: true
           type: string
     post:
+      tags:
+        - user
       operationId: updateUser
       description: 'Only fields marked as [rw] can be directly modified. If other fields are present in the posted request they are ignored.'
       responses:
@@ -210,6 +232,8 @@ paths:
           schema:
             $ref: '#/definitions/User'
     delete:
+      tags:
+        - user
       operationId: deleteUser
       summary: 'Don''t do this... it''s permanent.'
       description: "\nDelete a user. This will immediately and PERMANENTLY delete a user and all associated networks and data. Only hit this URL if you’re 100% sure you want the user deleted."
@@ -227,6 +251,8 @@ paths:
           type: string
   /randomToken:
     get:
+      tags:
+        - util
       operationId: randomToken
       description: 'This generates a random token suitable for use as an API token server-side using a secure random source. It does not actually modify the user record, just returns the token for use by API callers or the UI.'
       responses:
