@@ -57,7 +57,7 @@ it in any particular way other than simply reading it as a human. The author doe
 as it is manually created and maintained. 
 
 ## Why
-This project is not affiliated with ZeroTier in any wa, other than that I needed a way to actually use their client API.
+This project is not affiliated with ZeroTier in any way, other than that I needed a way to actually use their client API.
 As such there are no guarantees that they will or will not make breaking changes to the service which in turn invalidate
 the contract presented here.
 
